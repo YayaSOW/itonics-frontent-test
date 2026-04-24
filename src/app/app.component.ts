@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import {AgGridModule} from "ag-grid-angular";
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [
+    AgGridModule
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
