@@ -1,21 +1,24 @@
-<div class="p-6">
-  <h1 class="text-3xl font-bold text-yellow-500 mb-4">
-    🚀 Star Wars Fleet Directory
-  </h1>
+<div class="min-h-screen text-white p-8">
 
-  <div *ngIf="isLoading" class="text-center py-8">
-    <div
-      class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"
-    ></div>
-    <p class="mt-2 text-gray-600">Loading starships...</p>
+  <h1 class="text-3xl font-bold text-yellow-400 mb-6">🚀 Star Wars Fleet</h1>
+
+  <div *ngIf="isLoading" class="text-gray-400">Chargement des vaisseaux...</div>
+
+  <div *ngIf="errorMessage" class="text-red-400">
+    {{ errorMessage }}
   </div>
 
   <div *ngIf="!isLoading && !errorMessage">
-    <p class="mb-2 text-green-600">
-      ✅ Données chargées ! {{ starships.length }} vaisseaux
+    <p class="text-gray-400 mb-4">
+      {{ starships.length }} vaisseaux chargés
     </p>
-    <pre class="bg-gray-100 p-4 rounded overflow-auto max-h-96 text-xs"
-      >{{ starships | json }}
-    </pre>
+    <ul class="space-y-2">
+      <li
+        *ngFor="let ship of starships"
+        class="bg-gray-800 p-3 rounded text-sm"
+      >
+        {{ ship.name }} — {{ ship.model }}
+      </li>
+    </ul>
   </div>
 </div>
