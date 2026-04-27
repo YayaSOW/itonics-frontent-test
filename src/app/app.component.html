@@ -1,5 +1,21 @@
-<h1 class="text-2xl font-bold mb-4">Starships</h1>
+<div class="p-6">
+  <h1 class="text-3xl font-bold text-yellow-500 mb-4">
+    🚀 Star Wars Fleet Directory
+  </h1>
 
-<pre class="bg-gray-900 text-yellow-400 p-4 rounded overflow-auto">
-{{ starships }}
-</pre>
+  <div *ngIf="isLoading" class="text-center py-8">
+    <div
+      class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"
+    ></div>
+    <p class="mt-2 text-gray-600">Loading starships...</p>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage">
+    <p class="mb-2 text-green-600">
+      ✅ Données chargées ! {{ starships.length }} vaisseaux
+    </p>
+    <pre class="bg-gray-100 p-4 rounded overflow-auto max-h-96 text-xs"
+      >{{ starships | json }}
+    </pre>
+  </div>
+</div>
