@@ -1,13 +1,12 @@
 <div class="h-full flex flex-col bg-white text-gray-800">
 
-  <div class="px-6 pt-6">
+    <div class="px-6 pt-6">
     <h1 class="text-3xl font-bold text-blue-400">Star Wars Fleet</h1>
   </div>
   <div class="flex items-center gap-3 px-4 py-2 border-b border-gray-200 shrink-0">
-    <div class="flex items-center gap-2 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-500 w-56">
-      <span>🔍</span>
-      <span>Search elements...</span>
-    </div>
+    <app-search-bar
+      (searchChanged)="onSearchChanged($event)">
+    </app-search-bar>
     <span class="text-sm text-gray-400">{{ starships.length }} elements</span>
   </div>
 
@@ -25,9 +24,14 @@
     </button>
   </div>
 
-  <div class="flex-1 min-h-0">
+  <div *ngIf="!isLoading && !errorMessage && starships.length === 0"
+       class="flex-1 flex items-center justify-center text-gray-400">
+    No results found for "{{ searchTerm }}"
+  </div>
+
+  <div class="flex-1 min-h-0"
+       *ngIf="!isLoading && !errorMessage">
     <app-starship-grid
-      *ngIf="!isLoading && !errorMessage"
       [starships]="starships"
       [hasMore]="swapiService.hasMorePages()"
       (loadMore)="onLoadMore()">
