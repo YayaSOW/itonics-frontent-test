@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { SwapiService } from './services/swapi.service';
 import { Starship } from './models/starship.model';
 import { StarshipGridComponent } from './components/starship-grid/starship-grid.component';
@@ -22,9 +23,20 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.swapiService.loadFirstPage().subscribe({
-      next: (ships) => {
-        this.starships = ships;
-        this.isLoading = false;
+      next: (page1) => {
+        this.starships = page1;
+
+        if (this.swapiService.hasMorePages()) {
+          this.swapiService.loadNextPage().subscribe({
+            next: (page2) => {
+              this.starships = [...this.starships, ...page2];
+              this.isLoading = false;
+            },
+            error: () => { this.isLoading = false; }
+          });
+        } else {
+          this.isLoading = false;
+        }
       },
       error: () => {
         this.errorMessage = 'Impossible de charger les vaisseaux.';
@@ -35,7 +47,6 @@ export class AppComponent implements OnInit {
 
   onLoadMore(): void {
     if (this.isLoadingMore || !this.swapiService.hasMorePages()) return;
-
     this.isLoadingMore = true;
 
     this.swapiService.loadNextPage().subscribe({
@@ -45,9 +56,7 @@ export class AppComponent implements OnInit {
         }
         this.isLoadingMore = false;
       },
-      error: () => {
-        this.isLoadingMore = false;
-      }
+      error: () => { this.isLoadingMore = false; }
     });
   }
 
