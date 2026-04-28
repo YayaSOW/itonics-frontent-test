@@ -15,9 +15,10 @@ export class AppComponent implements OnInit {
 
   starships: Starship[] = [];
   isLoading = true;
+  isLoadingMore = false;        // ← manquait
   errorMessage: string | null = null;
 
-  constructor(private swapiService: SwapiService) { }
+  constructor(public swapiService: SwapiService) {}  // ← public pas private
 
   ngOnInit(): void {
     this.swapiService.loadFirstPage().subscribe({
@@ -30,5 +31,30 @@ export class AppComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  onLoadMore(): void {          // ← manquait
+    if (this.isLoadingMore || !this.swapiService.hasMorePages()) return;
+
+    this.isLoadingMore = true;
+
+    this.swapiService.loadNextPage().subscribe({
+      next: (newShips) => {
+        if (newShips.length > 0) {
+          this.starships = [...this.starships, ...newShips];
+        }
+        this.isLoadingMore = false;
+      },
+      error: () => {
+        this.isLoadingMore = false;
+      }
+    });
+  }
+
+  retry(): void {               // ← manquait
+    this.errorMessage = null;
+    this.isLoading = true;
+    this.swapiService.reset();
+    this.ngOnInit();
   }
 }
