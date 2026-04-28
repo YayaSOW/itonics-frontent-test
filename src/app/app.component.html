@@ -1,18 +1,46 @@
-<div class="min-h-screen bg-gray-950 text-white p-6">
-  <h1 class="text-3xl font-bold text-yellow-400 mb-4">🚀 Star Wars Fleet</h1>
+<div class="h-screen flex flex-col bg-white text-gray-800">
+  <h1 class="text-3xl font-bold text-blue-400 mb-4">Star Wars Fleet</h1>
+  <div
+    class="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white shrink-0"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="flex items-center gap-2 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-500 w-56"
+      >
+        <span>🔍</span>
+        <span>Search elements...</span>
+      </div>
+      <span class="text-sm text-gray-400">{{ starships.length }} elements</span>
+    </div>
+  </div>
 
-  <div *ngIf="isLoading" class="text-gray-400 text-lg">
+  <div
+    *ngIf="isLoading"
+    class="flex-1 flex items-center justify-center text-gray-400"
+  >
     Chargement des vaisseaux...
   </div>
 
-  <div *ngIf="errorMessage" class="text-red-400">
-    {{ errorMessage }}
-    <button class="ml-4 underline" (click)="ngOnInit()">Réessayer</button>
+  <div
+    *ngIf="errorMessage"
+    class="flex-1 flex items-center justify-center gap-4 text-red-500"
+  >
+    <span>{{ errorMessage }}</span>
+    <button
+      (click)="retry()"
+      class="bg-blue-500 text-white px-4 py-1 rounded text-sm"
+    >
+      Réessayer
+    </button>
   </div>
 
-  <app-starship-grid
-    *ngIf="!isLoading && !errorMessage"
-    [starships]="starships"
-  >
-  </app-starship-grid>
+  <div class="flex-1 overflow-hidden">
+    <app-starship-grid
+      *ngIf="!isLoading && !errorMessage"
+      [starships]="starships"
+      [hasMore]="swapiService.hasMorePages()"
+      (loadMore)="onLoadMore()"
+    >
+    </app-starship-grid>
+  </div>
 </div>
