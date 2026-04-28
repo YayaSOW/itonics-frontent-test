@@ -14,7 +14,7 @@ import { SearchBarComponent } from './components/search-bar/search-bar.component
 })
 export class AppComponent implements OnInit {
 
-  private allStarships: Starship[] = [];
+  allStarships: Starship[] = [];
 
   starships: Starship[] = [];
 
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
   errorMessage: string | null = null;
   searchTerm = '';
 
-  constructor(public swapiService: SwapiService) {}
+  constructor(public swapiService: SwapiService) { }
 
   ngOnInit(): void {
     this.swapiService.loadFirstPage().subscribe({
@@ -89,5 +89,9 @@ export class AppComponent implements OnInit {
     this.starships = [];
     this.swapiService.reset();
     this.ngOnInit();
+  }
+
+  get allLoaded(): boolean {
+    return !this.isLoading && !this.swapiService.hasMorePages() && this.allStarships.length > 0;
   }
 }

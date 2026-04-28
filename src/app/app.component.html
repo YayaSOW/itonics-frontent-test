@@ -38,4 +38,8 @@
     </app-starship-grid>
   </div>
 
+     <div *ngIf="allLoaded"
+       class="text-center text-sm text-gray-400 py-2 border-t border-gray-100 shrink-0">
+    ✓ All {{ allStarships.length }} starships loaded
+  </div>
 </div>
