@@ -15,12 +15,11 @@ import { SearchBarComponent } from './components/search-bar/search-bar.component
 export class AppComponent implements OnInit {
 
   allStarships: Starship[] = [];
-
   starships: Starship[] = [];
-
   isLoading = true;
   isLoadingMore = false;
   errorMessage: string | null = null;
+  scrollErrorMessage: string | null = null;
   searchTerm = '';
 
   constructor(public swapiService: SwapiService) { }
@@ -29,7 +28,7 @@ export class AppComponent implements OnInit {
     this.swapiService.loadFirstPage().subscribe({
       next: (page1) => {
         this.allStarships = page1;
-        this.starships = page1;
+        this.applyFilter();
 
         if (this.swapiService.hasMorePages()) {
           this.swapiService.loadNextPage().subscribe({
@@ -38,14 +37,17 @@ export class AppComponent implements OnInit {
               this.applyFilter();
               this.isLoading = false;
             },
-            error: () => { this.isLoading = false; }
+            error: () => {
+              this.isLoading = false;
+              this.scrollErrorMessage = 'Failed to load more. Click to retry.';
+            }
           });
         } else {
           this.isLoading = false;
         }
       },
       error: () => {
-        this.errorMessage = 'Impossible de charger les vaisseaux.';
+        this.errorMessage = 'Unable to load starships. Check your connection.';
         this.isLoading = false;
       }
     });
@@ -69,6 +71,7 @@ export class AppComponent implements OnInit {
   onLoadMore(): void {
     if (this.isLoadingMore || !this.swapiService.hasMorePages()) return;
     this.isLoadingMore = true;
+    this.scrollErrorMessage = null;
 
     this.swapiService.loadNextPage().subscribe({
       next: (newShips) => {
@@ -78,7 +81,10 @@ export class AppComponent implements OnInit {
         }
         this.isLoadingMore = false;
       },
-      error: () => { this.isLoadingMore = false; }
+      error: () => {
+        this.isLoadingMore = false;
+        this.scrollErrorMessage = 'Failed to load more. Click to retry.';
+      }
     });
   }
 
@@ -91,7 +97,14 @@ export class AppComponent implements OnInit {
     this.ngOnInit();
   }
 
+  retryScroll(): void {
+    this.scrollErrorMessage = null;
+    this.onLoadMore();
+  }
+
   get allLoaded(): boolean {
-    return !this.isLoading && !this.swapiService.hasMorePages() && this.allStarships.length > 0;
+    return !this.isLoading &&
+      !this.swapiService.hasMorePages() &&
+      this.allStarships.length > 0;
   }
 }
