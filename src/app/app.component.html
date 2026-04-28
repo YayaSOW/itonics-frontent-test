@@ -1,24 +1,18 @@
-<div class="min-h-screen text-white p-8">
+<div class="min-h-screen bg-gray-950 text-white p-6">
+  <h1 class="text-3xl font-bold text-yellow-400 mb-4">🚀 Star Wars Fleet</h1>
 
-  <h1 class="text-3xl font-bold text-yellow-400 mb-6">🚀 Star Wars Fleet</h1>
-
-  <div *ngIf="isLoading" class="text-gray-400">Chargement des vaisseaux...</div>
+  <div *ngIf="isLoading" class="text-gray-400 text-lg">
+    Chargement des vaisseaux...
+  </div>
 
   <div *ngIf="errorMessage" class="text-red-400">
     {{ errorMessage }}
+    <button class="ml-4 underline" (click)="ngOnInit()">Réessayer</button>
   </div>
 
-  <div *ngIf="!isLoading && !errorMessage">
-    <p class="text-gray-400 mb-4">
-      {{ starships.length }} vaisseaux chargés
-    </p>
-    <ul class="space-y-2">
-      <li
-        *ngFor="let ship of starships"
-        class="bg-gray-800 p-3 rounded text-sm"
-      >
-        {{ ship.name }} — {{ ship.model }}
-      </li>
-    </ul>
-  </div>
+  <app-starship-grid
+    *ngIf="!isLoading && !errorMessage"
+    [starships]="starships"
+  >
+  </app-starship-grid>
 </div>
