@@ -1,59 +1,134 @@
-# ItonicsTest
+# 🚀 Star Wars Fleet — Angular Data Grid
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+Application Angular single-page qui affiche les vaisseaux Star Wars depuis l'API SWAPI dans un tableau de données interactif et riche en fonctionnalités.
 
-## Development server
+---
 
-To start a local development server, run:
+## 📦 Stack Technique
+
+| Outil | Version | Pourquoi |
+|-------|---------|----------|
+| Angular | 19 |
+| AG Grid Community | 33+ | Resize natif des colonnes, cellules éditables, scroll virtuel |
+| Tailwind CSS | 3 | Style utilitaire, rapide à mettre en place |
+| RxJS | 7 | Flux de données asynchrones, appels HTTP, pagination |
+| Jasmine / Karma | intégré | Tests unitaires |
+
+---
+
+## ⚙️ Installation & Lancement
 
 ```bash
+# Cloner le dépôt
+git clone <url-du-repo>
+cd starwars-grid
+
+# Installer les dépendances
+npm install
+
+# Lancer le serveur de développement
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Ouvrir **http://localhost:4200** dans le navigateur.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## 🧪 Lancer les Tests
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+Un navigateur Karma s'ouvre. Résultat attendu : **6 specs, 0 failures**.
 
-For end-to-end (e2e) testing, run:
+---
 
-```bash
-ng e2e
+## 🌐 API Utilisée
+
+**Miroir SWAPI** — `https://swapi.py4e.com/api/starships/`
+
+> L'URL officielle `swapi.dev` étant parfois instable, le miroir py4e a été utilisé. Il fournit exactement les mêmes données et la même structure de réponse.
+
+Chaque page retourne **10 vaisseaux**. Total : ~37 vaisseaux sur 4 pages.
+
+---
+
+## ✨ Fonctionnalités
+
+### 📊 Tableau de Données
+- 10 colonnes affichées : Nom, Modèle, Fabricant, Classe, Équipage, Passagers, Hyperdrive, Longueur, Vitesse Max, Coût
+- Toutes les colonnes sont **redimensionnables** en tirant les bords
+- Toutes les colonnes sont **triables** en cliquant sur l'en-tête
+
+### 🔄 Infinite Scroll
+Le tableau charge **2 pages (20 vaisseaux) au démarrage** pour remplir l'écran, puis charge automatiquement la page suivante quand l'utilisateur scrolle vers le bas.
+
+**Comment ça fonctionne :**
+1. AG Grid déclenche l'événement `bodyScrollEnd` quand l'utilisateur atteint le bas
+2. `onLoadMore()` dans `AppComponent` est appelée
+3. `SwapiService.loadNextPage()` récupère la page suivante
+4. Les nouveaux vaisseaux sont **ajoutés** à la liste existante — jamais remplacés
+
+**Aucun loader visible pendant le scroll** — seul `isLoadingMore` (booléen interne) bloque les appels en double. Le chargement initial a son propre indicateur `isLoading` séparé.
+
+**Cache des pages :**
+Chaque page chargée est stockée dans une `Map<number, Starship[]>`. Avant tout appel HTTP, le service vérifie si la page est déjà en cache. Si oui, les données sont retournées immédiatement via `of()` sans aucune requête réseau.
+
+### 🔍 Recherche / Filtrage
+- Filtrage en temps réel à chaque frappe
+- Filtre par **nom** de vaisseau (insensible à la casse)
+- Affiche "No results found" quand aucun résultat ne correspond
+- Bouton × pour effacer et restaurer la liste complète
+- Le filtrage s'applique sur les **données déjà chargées** — aucun appel API supplémentaire
+
+### ✏️ Cellules Éditables
+La colonne **Crew** est éditable :
+- **Double-cliquer** sur une cellule pour passer en mode édition
+- **Entrée** pour confirmer
+- **Échap** pour annuler
+
+Les modifications sont stockées dans `SwapiService` via une `Map<string, Partial<Starship>>` où la clé est l'`url` unique du vaisseau.
+
+**Pourquoi dans le service ?**
+Le test impose que les modifications soient facilement remplaçables par de vrais appels API plus tard. En gardant les éditions dans le service, remplacer `editedValues.set(...)` par un `http.patch(...)` ne nécessite **aucun changement** dans le composant.
+
+### ⚠️ Gestion des Erreurs
+Deux états d'erreur distincts :
+
+| Type d'erreur | Quand | Comportement |
+|--------------|-------|-------------|
+| Erreur initiale | La page 1 échoue | Message plein écran + bouton Réessayer |
+| Erreur de scroll | La page 3+ échoue | Bannière en bas + Réessayer (le tableau reste visible) |
+
+### 📋 Fin de Liste
+Quand tous les vaisseaux sont chargés, un message apparaît en bas :
+> ✓ All 37 starships loaded
+
+---
+
+## 🏗️ Architecture
+
+```
+src/app/
+├── components/
+│   ├── starship-grid/       → Tableau AG Grid + détection scroll + cellules éditables
+│   └── search-bar/          → Champ de recherche avec bouton effacer
+├── services/
+│   └── swapi.service.ts     → Appels HTTP + pagination + cache + stockage des éditions
+├── models/
+│   └── starship.model.ts    → Interfaces TypeScript Starship & SwapiResponse
+└── app.component.ts         → Orchestrateur : chargement, filtrage, gestion erreurs
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## 🧪 Tests Unitaires
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Test | Fichier | Ce qui est vérifié |
+|------|---------|-------------------|
+| Page 1 chargée correctement | `swapi.service.spec.ts` | GET HTTP appelé, 1 résultat retourné, `hasMorePages()` est vrai |
+| Cache fonctionnel | `swapi.service.spec.ts` | Après chargement page 1, `getAllCachedStarships()` retourne les données sans nouvel appel HTTP |
+| Filtrage par nom | `app.component.spec.ts` | "falcon" retourne uniquement le Millennium Falcon |
+| Getter allLoaded | `app.component.spec.ts` | Retourne true quand `isLoading=false` et `hasMorePages()=false` |
+
