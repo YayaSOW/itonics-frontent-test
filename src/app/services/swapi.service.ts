@@ -15,6 +15,7 @@ export class SwapiService {
   private currentPageNumber = 1;
 
   private cache = new Map<number, Starship[]>();
+  private editedValues = new Map<string, Partial<Starship>>();
 
   constructor(private http: HttpClient) { }
 
@@ -36,6 +37,20 @@ export class SwapiService {
       }),
       map(response => response.results)
     );
+  }
+
+  saveEdit(starshipUrl: string, field: keyof Starship, value: string): void {
+    const existing = this.editedValues.get(starshipUrl) || {};
+    this.editedValues.set(starshipUrl, { ...existing, [field]: value });
+    console.log(`EDIT: ${starshipUrl} → ${field} = ${value}`);
+  }
+
+  getEdits(starshipUrl: string): Partial<Starship> {
+    return this.editedValues.get(starshipUrl) || {};
+  }
+
+  getAllEdits(): Map<string, Partial<Starship>> {
+    return this.editedValues;
   }
 
   loadFirstPage(): Observable<Starship[]> {
