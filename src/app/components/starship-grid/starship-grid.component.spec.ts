@@ -1,23 +1,20 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { TestBed } from '@angular/core/testing';
 import { StarshipGridComponent } from './starship-grid.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('StarshipGridComponent', () => {
-  let component: StarshipGridComponent;
-  let fixture: ComponentFixture<StarshipGridComponent>;
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StarshipGridComponent]
-    })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(StarshipGridComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+      imports: [
+        StarshipGridComponent,
+        HttpClientTestingModule
+      ]
+    }).compileComponents();
   });
 
   it('should create', () => {
+    const fixture = TestBed.createComponent(StarshipGridComponent);
+    const component = fixture.componentInstance;
     expect(component).toBeTruthy();
   });
 });
