@@ -1,0 +1,4 @@
+{
+    "buildCommand": "ng build --optimization --source-map=false",
+    "outputDirectory": "dist/itonics-test"
+}
