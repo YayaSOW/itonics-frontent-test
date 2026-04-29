@@ -103,7 +103,7 @@ Deux états d'erreur distincts :
 
 ### 📋 Fin de Liste
 Quand tous les vaisseaux sont chargés, un message apparaît en bas :
-> ✓ All 36 starships loaded
+> ✓ All 37 starships loaded
 
 ---
 
@@ -121,38 +121,6 @@ src/app/
 └── app.component.ts         → Orchestrateur : chargement, filtrage, gestion erreurs
 ```
 
-**Décision d'architecture :** Architecture volontairement simple adaptée à la taille du projet. Un service, deux composants, un modèle. Pas de NgRx ni de patterns sur-ingéniérés — le service est la source de vérité unique et est facilement extensible.
-
----
-
-## 🔄 Remplacement de SWAPI par une Vraie API
-
-Le service est conçu pour une migration facile :
-
-```typescript
-// Actuel — lecture seule depuis SWAPI
-private loadPage(pageNumber: number): Observable<Starship[]> {
-  return this.http.get<SwapiResponse>(`${this.baseUrl}?page=${pageNumber}`)
-    .pipe(map(r => r.results));
-}
-
-// Futur — remplacer par votre vrai endpoint
-private loadPage(pageNumber: number): Observable<Starship[]> {
-  return this.http.get<VotreApiResponse>(`${this.realApiUrl}?page=${pageNumber}`)
-    .pipe(map(r => r.data));
-}
-
-// Actuel — stockage en mémoire
-saveEdit(url: string, field: keyof Starship, value: string): void {
-  this.editedValues.set(url, { ...existing, [field]: value });
-}
-
-// Futur — envoi vers une vraie API
-saveEdit(url: string, field: keyof Starship, value: string): void {
-  this.http.patch(`${this.realApiUrl}/${id}`, { [field]: value }).subscribe();
-}
-```
-
 ---
 
 ## 🧪 Tests Unitaires
@@ -164,11 +132,3 @@ saveEdit(url: string, field: keyof Starship, value: string): void {
 | Filtrage par nom | `app.component.spec.ts` | "falcon" retourne uniquement le Millennium Falcon |
 | Getter allLoaded | `app.component.spec.ts` | Retourne true quand `isLoading=false` et `hasMorePages()=false` |
 
----
-
-## 📝 Compromis & Limitations Connues
-
-- **La recherche filtre uniquement les données chargées** — SWAPI supporte `?search=` mais cela réinitialiserait la pagination et l'infinite scroll. Le filtrage en mémoire garde une UX cohérente.
-- **~36 vaisseaux au total** — SWAPI a un petit jeu de données. L'infinite scroll est fonctionnel mais atteint rapidement la fin de liste.
-- **Cache en mémoire** — se réinitialise au rechargement de la page. Pourrait être étendu avec `localStorage` si la persistance est nécessaire.
-- **Une seule colonne éditable** — `Crew` a été choisie comme colonne représentative. Le pattern est facilement réplicable sur n'importe quelle colonne en ajoutant `editable: true` dans sa `ColDef`.
