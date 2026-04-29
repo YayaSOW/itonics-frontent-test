@@ -1,14 +1,110 @@
-import { Component } from '@angular/core';
-import {AgGridModule} from "ag-grid-angular";
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SwapiService } from './services/swapi.service';
+import { Starship } from './models/starship.model';
+import { StarshipGridComponent } from './components/starship-grid/starship-grid.component';
+import { SearchBarComponent } from './components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    AgGridModule
-  ],
+  standalone: true,
+  imports: [CommonModule, StarshipGridComponent, SearchBarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'itonics-test';
+export class AppComponent implements OnInit {
+
+  allStarships: Starship[] = [];
+  starships: Starship[] = [];
+  isLoading = true;
+  isLoadingMore = false;
+  errorMessage: string | null = null;
+  scrollErrorMessage: string | null = null;
+  searchTerm = '';
+
+  constructor(public swapiService: SwapiService) { }
+
+  ngOnInit(): void {
+    this.swapiService.loadFirstPage().subscribe({
+      next: (page1) => {
+        this.allStarships = page1;
+        this.applyFilter();
+
+        if (this.swapiService.hasMorePages()) {
+          this.swapiService.loadNextPage().subscribe({
+            next: (page2) => {
+              this.allStarships = [...this.allStarships, ...page2];
+              this.applyFilter();
+              this.isLoading = false;
+            },
+            error: () => {
+              this.isLoading = false;
+              this.scrollErrorMessage = 'Failed to load more. Click to retry.';
+            }
+          });
+        } else {
+          this.isLoading = false;
+        }
+      },
+      error: () => {
+        this.errorMessage = 'Unable to load starships. Check your connection.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onSearchChanged(term: string): void {
+    this.searchTerm = term;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    if (!this.searchTerm) {
+      this.starships = [...this.allStarships];
+      return;
+    }
+    this.starships = this.allStarships.filter(ship =>
+      ship.name.toLowerCase().includes(this.searchTerm)
+    );
+  }
+
+  onLoadMore(): void {
+    if (this.isLoadingMore || !this.swapiService.hasMorePages()) return;
+    this.isLoadingMore = true;
+    this.scrollErrorMessage = null;
+
+    this.swapiService.loadNextPage().subscribe({
+      next: (newShips) => {
+        if (newShips.length > 0) {
+          this.allStarships = [...this.allStarships, ...newShips];
+          this.applyFilter();
+        }
+        this.isLoadingMore = false;
+      },
+      error: () => {
+        this.isLoadingMore = false;
+        this.scrollErrorMessage = 'Failed to load more. Click to retry.';
+      }
+    });
+  }
+
+  retry(): void {
+    this.errorMessage = null;
+    this.isLoading = true;
+    this.allStarships = [];
+    this.starships = [];
+    this.swapiService.reset();
+    this.ngOnInit();
+  }
+
+  retryScroll(): void {
+    this.scrollErrorMessage = null;
+    this.onLoadMore();
+  }
+
+  get allLoaded(): boolean {
+    return !this.isLoading &&
+      !this.swapiService.hasMorePages() &&
+      this.allStarships.length > 0;
+  }
 }
