@@ -21,7 +21,7 @@ Application Angular single-page qui affiche les vaisseaux Star Wars depuis l'API
 ```bash
 # Cloner le dépôt
 git clone <url-du-repo>
-cd starwars-grid
+cd itonics-frontent-test
 
 # Installer les dépendances
 npm install
